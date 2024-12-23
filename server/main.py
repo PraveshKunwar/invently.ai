@@ -1,10 +1,9 @@
 from flask import Flask
+from app import create
+from dotenv import load_dotenv
+import os
 
-app = Flask(__name__)
+app: Flask = create()
 
-@app.route('/')
-def home():
-    return "Backend is running!"
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     app.run(debug=True)
