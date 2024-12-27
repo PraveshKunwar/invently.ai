@@ -11,9 +11,31 @@ import {
 const SignUpForm: React.FC = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
   const handleSubmit = async (e: React.FormEvent) => {
-    console.log(email, password);
+    e.preventDefault();
+    try {
+      const response = await fetch("http://localhost:5000/signup", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email,
+          password,
+        }),
+      });
+      if (response.ok) {
+        const data = await response.json();
+        alert("Account created successfully!");
+        console.log(data);
+      } else {
+        const errorData = await response.json();
+        console.error(`Error: ${errorData.error}`);
+      }
+    } catch (error) {
+      console.error("An error occurred:", error);
+      alert("An unexpected error occurred. Please try again later.");
+    }
   };
 
   return (

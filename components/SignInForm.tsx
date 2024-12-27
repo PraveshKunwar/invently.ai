@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import axios from "axios";
 import {
   Box,
   Button,
@@ -8,23 +7,49 @@ import {
   Container,
   Paper,
 } from "@mui/material";
+import { useNavigate } from "react-router-dom";
+
+interface ResponseOkData {
+  access_token: string;
+  refresh_token: string;
+  user: {
+    id: number;
+    email: string;
+    name: string;
+  };
+}
 
 const SignInForm = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
+  const navigate = useNavigate();
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await axios.post("http://localhost:5000/login", {
-        email,
-        password,
+      const response = await fetch("http://localhost:5000/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email,
+          password,
+        }),
       });
-      alert("Logged in successfully!");
-      console.log(response.data);
+      if (response.ok) {
+        const data: ResponseOkData = await response.json();
+        localStorage.setItem("access_token", data.access_token);
+        localStorage.setItem("refresh_token", data.refresh_token);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        localStorage.setItem("user", data.user as any); // Store user info
+        navigate("/dashboard");
+      } else {
+        const errorData = await response.json();
+        console.error(`Error: ${errorData.error}`);
+      }
     } catch (error) {
-      alert("Error logging in.");
-      console.error(error);
+      console.error("An error occurred:", error);
+      alert("An unexpected error occurred. Please try again later.");
     }
   };
 
@@ -133,7 +158,7 @@ const SignInForm = () => {
                   textTransform: "none",
                 }}
               >
-                Create Account
+                Sign In
               </Button>
             </Box>
           </form>

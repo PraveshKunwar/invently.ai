@@ -14,15 +14,20 @@ def signup():
         data = request.json
         email = data.get('email')
         password = data.get('password')
-
         if not email or not password:
             return jsonify({'error': 'Email and password are required'}), 400
-        response = supabase_client.auth.sign_up(email, password)
+        response = supabase_client.auth.sign_up({
+            "email": email,
+            "password": password,
+            "redirect_to": "http://localhost:5173/auth/callback"
+        })
         if "error" in response and response["error"]:
             return jsonify({"error": response["error"]["message"]}), 400
         return jsonify({"message": "User created successfully"}), 201
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+    
 @auth_bp.route('/login', methods=['POST'])
 def login():
     """Log in a user and return session details"""
@@ -32,18 +37,32 @@ def login():
         password = data.get("password")
         if not email or not password:
             return jsonify({"error": "Email and password are required"}), 400
-        response = supabase_client.auth.sign_in_with_password(email=email, password=password)
-        if "error" in response and response["error"]:
-            return jsonify({"error": response["error"]["message"]}), 400
-        session = response.get("session")
-        user = response.get("user")
-        if not session or not session.get("access_token"):
+        
+        response = supabase_client.auth.sign_in_with_password({
+            "email": email,
+            "password": password
+        })
+
+        session = response.session
+        user = response.user
+
+        if not session or not session.access_token:
             return jsonify({"error": "Session or access token missing"}), 500
+
+        # Convert user object to dictionary
+        user_data = {
+            "id": user.id,
+            "email": user.email,
+            "created_at": user.created_at,
+            "confirmed_at": user.confirmed_at,
+            "role": user.role,
+        }
+
         return jsonify({
-            "access_token": session["access_token"],
-            "refresh_token": session["refresh_token"],
-            "expires_in": session["expires_in"],
-            "user": user
+            "access_token": session.access_token,
+            "refresh_token": session.refresh_token,
+            "expires_in": session.expires_in,
+            "user": user_data  # Use serialized user data
         }), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500

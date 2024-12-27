@@ -17,6 +17,6 @@ def get_user():
         user_data = supabase_client.auth.get_user(jwt=token)
         if "error" in user_data and user_data["error"]:
             return jsonify({"error": user_data["error"]["message"]}), 400
-        return jsonify({"user": user_data}), 200
+        return jsonify({"user": user_data.user}), 200  # Ensure only the user object is sent
     except Exception as e:
         return jsonify({"error": str(e)}), 500
