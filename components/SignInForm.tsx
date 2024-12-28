@@ -41,7 +41,7 @@ const SignInForm = () => {
         localStorage.setItem("access_token", data.access_token);
         localStorage.setItem("refresh_token", data.refresh_token);
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        localStorage.setItem("user", data.user as any); // Store user info
+        // localStorage.setItem("user", data.user as any); // Store user info
         navigate("/dashboard");
       } else {
         const errorData = await response.json();

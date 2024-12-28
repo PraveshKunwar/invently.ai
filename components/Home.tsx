@@ -1,11 +1,23 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import SignUpForm from "./SignUpForm";
 import SignInForm from "./SignInForm";
 import { Box, Typography, Link } from "@mui/material";
+import Dashboard from "./Dashboard";
 
 const Home: React.FC = () => {
   const [showSignUp, setShowSignUp] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
+  useEffect(() => {
+    // Check if access_token exists in localStorage
+    const token = localStorage.getItem("access_token");
+    if (token) {
+      setIsAuthenticated(true);
+    }
+  }, []);
+  if (isAuthenticated) {
+    return <Dashboard />;
+  }
   return (
     <div className="home-page">
       <h1>
