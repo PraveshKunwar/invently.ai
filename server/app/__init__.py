@@ -7,5 +7,7 @@ def create() -> Flask:
     CORS(app, resources={r"/*": {"origins": "http://localhost:5173"}}, supports_credentials=True)
     app.secret_key = os.urandom(24)
     from .auth import auth_bp
+    from .data import data_bp
     app.register_blueprint(auth_bp)
+    app.register_blueprint(data_bp)
     return app

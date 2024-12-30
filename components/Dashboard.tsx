@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import SignOut from "./SignOut";
+import Product from "./Product";
 
 interface UserSession {
   id: string;
@@ -25,13 +26,11 @@ const Dashboard: React.FC = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState<UserSession | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-
   useEffect(() => {
     const checkUserSession = async () => {
       try {
         const token = localStorage.getItem("access_token");
         const refreshToken = localStorage.getItem("refresh_token");
-
         if (!token) {
           setIsLoading(false);
           navigate("/");
@@ -43,13 +42,11 @@ const Dashboard: React.FC = () => {
             Authorization: `Bearer ${token}`,
           },
         });
-
         if (response.status === 200) {
           const data = await response.json();
           setUser(data.user);
-          setIsLoading(false); // Stop the loading state
+          setIsLoading(false);
         } else if (response.status === 401 && refreshToken) {
-          // Token expired, refresh it
           const refreshResponse = await fetch("http://localhost:5000/refresh", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -66,29 +63,35 @@ const Dashboard: React.FC = () => {
             navigate("/");
           }
         } else {
-          setIsLoading(false); // Stop the loading state
-          navigate("/"); // Redirect to home
+          setIsLoading(false);
+          navigate("/");
         }
       } catch (error) {
-        setIsLoading(false); // Stop the loading state
-        navigate("/"); // Redirect to home
+        setIsLoading(false);
+        navigate("/");
       }
     };
 
     if (isLoading) {
-      checkUserSession(); // Only call if still loading
+      checkUserSession();
     }
   }, [isLoading, navigate]);
 
   if (isLoading) {
-    return <p>Loading...</p>; // Show a loading state while checking the session
+    return <p>Loading...</p>;
   }
-
   return (
     <div>
       <h1>Dashboard</h1>
-      {user ? <p>Welcome, {user.email}!</p> : <p>Session not found.</p>}
-      <SignOut />
+      {user ? (
+        <div className="dashboard-data">
+          <p>Welcome, {user.email}!</p>
+          <SignOut />
+          <Product />
+        </div>
+      ) : (
+        <p>Session not found.</p>
+      )}
     </div>
   );
 };

@@ -99,7 +99,7 @@ const SignUpForm: React.FC = () => {
                 sx={{
                   "& .MuiOutlinedInput-root": {
                     "&.Mui-focused fieldset": {
-                      borderColor: "black", // Custom focus outline color
+                      borderColor: "black",
                     },
                   },
                 }}
@@ -123,12 +123,11 @@ const SignUpForm: React.FC = () => {
                 sx={{
                   "& .MuiOutlinedInput-root": {
                     "&.Mui-focused fieldset": {
-                      borderColor: "black", // Custom focus outline color
+                      borderColor: "black",
                     },
                   },
                 }}
               />
-
               <Button
                 type="submit"
                 variant="contained"

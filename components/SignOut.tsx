@@ -43,6 +43,7 @@ const SignOut: React.FC = () => {
         variant="solid"
         sx={{
           width: "100%",
+          maxWidth: "200px",
           padding: "0.75rem",
           fontWeight: "bold",
           textTransform: "uppercase",

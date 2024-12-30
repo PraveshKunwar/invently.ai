@@ -18,8 +18,6 @@ const Home: React.FC = () => {
         setIsAuthenticated(false);
         return;
       }
-
-      // Validate the current access token
       const response = await fetch("http://localhost:5000/me", {
         method: "GET",
         headers: {

@@ -1,11 +1,9 @@
 import React, { useEffect } from "react";
 import LoginIcon from "@mui/icons-material/Login";
-import { useNavigate, Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Button } from "@mui/joy";
 
 const Login: React.FC = () => {
-  const navigate = useNavigate();
-
   useEffect(() => {
     fetch("http://localhost:5000/me", { credentials: "include" })
       .then((res) => {

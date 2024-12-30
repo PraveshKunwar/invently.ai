@@ -114,7 +114,7 @@ const SignInForm = () => {
                 sx={{
                   "& .MuiOutlinedInput-root": {
                     "&.Mui-focused fieldset": {
-                      borderColor: "black", // Custom focus outline color
+                      borderColor: "black",
                     },
                   },
                 }}
@@ -138,12 +138,11 @@ const SignInForm = () => {
                 sx={{
                   "& .MuiOutlinedInput-root": {
                     "&.Mui-focused fieldset": {
-                      borderColor: "black", // Custom focus outline color
+                      borderColor: "black",
                     },
                   },
                 }}
               />
-
               <Button
                 type="submit"
                 variant="contained"
