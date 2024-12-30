@@ -24,14 +24,16 @@ interface UserSession {
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState<UserSession | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
   useEffect(() => {
     const checkUserSession = async () => {
       try {
         const token = localStorage.getItem("access_token");
         const refreshToken = localStorage.getItem("refresh_token");
-        console.log(token);
+
         if (!token) {
-          console.error("No token found in localStorage");
+          setIsLoading(false);
           navigate("/");
           return;
         }
@@ -41,38 +43,51 @@ const Dashboard: React.FC = () => {
             Authorization: `Bearer ${token}`,
           },
         });
-        if (response.status !== 200) {
-          // Token is expired, attempt to refresh
+
+        if (response.status === 200) {
+          const data = await response.json();
+          setUser(data.user);
+          setIsLoading(false); // Stop the loading state
+        } else if (response.status === 401 && refreshToken) {
+          // Token expired, refresh it
           const refreshResponse = await fetch("http://localhost:5000/refresh", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ refresh_token: refreshToken }),
           });
-          if (!refreshResponse.ok) {
-            console.error("Failed to refresh token");
+
+          if (refreshResponse.ok) {
+            const newTokens = await refreshResponse.json();
+            localStorage.setItem("access_token", newTokens.access_token);
+            localStorage.setItem("refresh_token", newTokens.refresh_token);
+            await checkUserSession();
+          } else {
+            setIsLoading(false);
             navigate("/");
-            return;
           }
-          const newTokens = await refreshResponse.json();
-          localStorage.setItem("access_token", newTokens.access_token);
-          localStorage.setItem("refresh_token", newTokens.refresh_token);
-          console.log("Token refreshed successfully");
-          return; // Retry session check after refreshing token
+        } else {
+          setIsLoading(false); // Stop the loading state
+          navigate("/"); // Redirect to home
         }
-        const data = await response.json();
-        setUser(data.user);
       } catch (error) {
-        console.error("Error checking user session:", error);
-        navigate("/");
+        setIsLoading(false); // Stop the loading state
+        navigate("/"); // Redirect to home
       }
     };
-    checkUserSession();
-  }, [navigate]);
+
+    if (isLoading) {
+      checkUserSession(); // Only call if still loading
+    }
+  }, [isLoading, navigate]);
+
+  if (isLoading) {
+    return <p>Loading...</p>; // Show a loading state while checking the session
+  }
 
   return (
     <div>
       <h1>Dashboard</h1>
-      {user?.email}
+      {user ? <p>Welcome, {user.email}!</p> : <p>Session not found.</p>}
       <SignOut />
     </div>
   );

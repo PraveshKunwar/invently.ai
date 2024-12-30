@@ -68,22 +68,18 @@ def login():
 
 @auth_bp.route('/logout', methods=['POST'])
 def logout():
-    """Log out a user and invalidate the session"""
+    """Log out a user"""
     try:
-        # Get the Authorization header
         auth_header = request.headers.get("Authorization")
         if not auth_header:
             return jsonify({"error": "Authorization header missing"}), 401
-        # Validate the token format
         parts = auth_header.split(" ")
         if len(parts) != 2 or parts[0].lower() != "bearer":
             return jsonify({"error": "Invalid authorization header format"}), 401
-        # Proceed with sign out (if needed)
         response = supabase_client.auth.sign_out()
-        if "error" in response and response["error"]:
-            return jsonify({"error": response["error"]["message"]}), 400
         return jsonify({"message": "Logged out successfully"}), 200
     except Exception as e:
+        print(f"Error in /logout route: {e}")
         return jsonify({"error": str(e)}), 500
 
 @auth_bp.route('/refresh', methods=['POST'])
@@ -106,7 +102,6 @@ def refresh_token():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-
 @auth_bp.route('/me', methods=['GET'])
 def get_user():
     """Fetch details of the currently logged-in user"""
@@ -116,8 +111,6 @@ def get_user():
             return jsonify({"error": "Authorization header missing"}), 401
         token = auth_header.split(" ")[1]
         user_data = supabase_client.auth.get_user(jwt=token)
-        # Debugging print statements
-        print(f"Supabase user response: {user_data}")
         # Handle Supabase errors
         if "error" in user_data and user_data["error"]:
             return jsonify({"error": user_data["error"]["message"]}), 400

@@ -18,23 +18,23 @@ const SignOut: React.FC = () => {
           Authorization: `Bearer ${token}`,
         },
       });
+      localStorage.removeItem("access_token");
+      localStorage.removeItem("refresh_token");
+      localStorage.removeItem("user");
       if (response.ok) {
-        // Clear local storage and redirect
-        localStorage.removeItem("access_token");
-        localStorage.removeItem("refresh_token");
-        localStorage.removeItem("user");
         alert("Logged out successfully!");
-        navigate("/");
       } else {
-        const errorData = await response.json();
-        console.error(`Error: ${errorData.error}`);
+        alert("An error occurred during logout.");
       }
+      navigate("/");
     } catch (error) {
-      console.error("Error during sign out:", error);
       alert("An unexpected error occurred.");
+      localStorage.removeItem("access_token");
+      localStorage.removeItem("refresh_token");
+      localStorage.removeItem("user");
+      navigate("/");
     }
   };
-
   return (
     <div>
       <Button
