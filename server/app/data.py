@@ -18,3 +18,14 @@ def get_products():
         return jsonify(products), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+@data_bp.route('/product/<int:product_id>', methods=['GET'])
+def get_product_by_id(product_id):
+    try:
+        response = supabase_client.table('Products').select('*').eq('id', product_id).execute()
+        product = response.data
+        if not product:
+            return jsonify({"error": "Product not found"}), 404
+        return jsonify(product[0]), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500

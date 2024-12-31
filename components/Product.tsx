@@ -8,6 +8,7 @@ import {
   Box,
   Button,
 } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 
 interface ProductData {
   id: string;
@@ -19,13 +20,17 @@ interface ProductData {
   price: number;
   supplier?: string;
   avatar_url?: string;
+  depletion_rate?: number;
 }
 
 const Product: React.FC = () => {
   const [products, setProducts] = useState<ProductData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
+  const navigate = useNavigate();
+  const handleViewAnalytics = (id: string) => {
+    navigate(`/dashboard/products/${id}`);
+  };
   useEffect(() => {
     const fetchProducts = async () => {
       try {
@@ -88,8 +93,8 @@ const Product: React.FC = () => {
                 <Avatar
                   src={product.avatar_url}
                   sx={{
-                    width: 48,
-                    height: 48,
+                    width: 128,
+                    height: 128,
                     fontSize: "1.2rem",
                   }}
                 >
@@ -153,9 +158,7 @@ const Product: React.FC = () => {
                       backgroundColor: "white",
                     },
                   }}
-                  onClick={() => {
-                    console.log(`View analytics for product: ${product.id}`);
-                  }}
+                  onClick={() => handleViewAnalytics(product.id)}
                 >
                   View Analytics
                 </Button>
