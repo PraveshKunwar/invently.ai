@@ -12,6 +12,7 @@ import {
   FormControlLabel,
   Grid,
 } from "@mui/material";
+import Alert from "@mui/material/Alert";
 
 interface ProductData {
   id: string;
@@ -89,6 +90,10 @@ const ProductDetail: React.FC = () => {
   };
 
   const handleSubmit = async () => {
+    if (updates.length === 0) {
+      alert("Please select at least one field to update.");
+      return;
+    }
     try {
       const response = await fetch(`http://localhost:5000/product/${id}`, {
         method: "PUT",
@@ -262,6 +267,11 @@ const ProductDetail: React.FC = () => {
         >
           Update Product
         </Button>
+        {product.threshold_level > product.stock_level ? (
+          <Alert severity="warning">
+            WARNING: {product.name} is below threshold level, update stock soon!
+          </Alert>
+        ) : null}
       </Box>
     </Box>
   );
