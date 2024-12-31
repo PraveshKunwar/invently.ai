@@ -7,6 +7,10 @@ import {
   Avatar,
   Box,
   Button,
+  TextField,
+  Checkbox,
+  FormControlLabel,
+  Grid,
 } from "@mui/material";
 
 interface ProductData {
@@ -22,171 +26,245 @@ interface ProductData {
   depletion_rate?: number;
 }
 
+interface UpdateField {
+  field_name: keyof ProductData;
+  new_value: string | number;
+}
+
 const ProductDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [product, setProduct] = useState<ProductData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [updates, setUpdates] = useState<UpdateField[]>([]);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const checkAuthenticationAndFetchProduct = async () => {
+    const fetchProduct = async () => {
       try {
         const token = localStorage.getItem("access_token");
-        const refreshToken = localStorage.getItem("refresh_token");
-        if (!token || !refreshToken) {
-          console.error("No valid tokens found. Redirecting to login.");
-          navigate("/");
-          return;
-        }
-        const authResponse = await fetch("http://localhost:5000/me", {
+        const response = await fetch(`http://localhost:5000/product/${id}`, {
           method: "GET",
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
-        if (!authResponse.ok) {
-          const refreshResponse = await fetch("http://localhost:5000/refresh", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ refresh_token: refreshToken }),
-          });
-          if (!refreshResponse.ok) {
-            console.error("Failed to refresh token. Redirecting to login.");
-            navigate("/");
-            return;
-          }
-          const refreshData = await refreshResponse.json();
-          localStorage.setItem("access_token", refreshData.access_token);
-          localStorage.setItem("refresh_token", refreshData.refresh_token);
-          console.log("Token refreshed successfully.");
-        }
-        const productResponse = await fetch(
-          `http://localhost:5000/product/${id}`,
-          {
-            method: "GET",
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-            },
-          }
-        );
-        if (!productResponse.ok) {
-          setError("Product not found");
-          return;
-        }
-        const productData = await productResponse.json();
-        setProduct(productData);
-      } catch (error) {
-        console.error("Error occurred:", error);
-        setError("An error occurred. Please try again.");
+        if (!response.ok) throw new Error("Failed to fetch product");
+        const data = await response.json();
+        setProduct(data);
+      } catch (err) {
+        setError("Product not found");
       } finally {
         setLoading(false);
       }
     };
-    checkAuthenticationAndFetchProduct();
-  }, [id, navigate]);
 
+    fetchProduct();
+  }, [id]);
+
+  const handleCheckboxChange = (
+    field_name: keyof ProductData,
+    checked: boolean
+  ) => {
+    if (checked) {
+      setUpdates((prev) => [...prev, { field_name, new_value: "" }]);
+    } else {
+      setUpdates((prev) =>
+        prev.filter((update) => update.field_name !== field_name)
+      );
+    }
+  };
+
+  const handleValueChange = (
+    field_name: keyof ProductData,
+    value: string | number
+  ) => {
+    setUpdates((prev) =>
+      prev.map((update) =>
+        update.field_name === field_name
+          ? { ...update, new_value: value }
+          : update
+      )
+    );
+  };
+
+  const handleSubmit = async () => {
+    try {
+      const response = await fetch(`http://localhost:5000/product/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ updates }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        setError(errorData.error || "Failed to update product");
+        return;
+      }
+
+      alert("Product updated successfully!");
+      navigate("/dashboard");
+    } catch (err) {
+      setError("An error occurred while updating the product.");
+    }
+  };
   if (loading) return <div>Loading product...</div>;
   if (error) return <div>Error: {error}</div>;
   if (!product) return <div>Product not found</div>;
 
   return (
-    <Box sx={{ display: "flex", justifyContent: "center", marginTop: "2rem" }}>
-      <Card
+    <Box sx={{ padding: "2rem", color: "#e0e7ff" }}>
+      <Box
+        sx={{ display: "flex", justifyContent: "center", marginBottom: "2rem" }}
+      >
+        <Card
+          sx={{
+            maxWidth: "400px",
+            width: "100%",
+            backgroundColor: "#1e1e1e",
+            color: "#e0e7ff",
+            borderRadius: "10px",
+            padding: "1rem",
+          }}
+        >
+          <CardContent sx={{ textAlign: "center" }}>
+            <Avatar
+              src={product.avatar_url}
+              sx={{
+                width: 128,
+                height: 128,
+                fontSize: "1.5rem",
+                margin: "0 auto",
+              }}
+            >
+              {product.name.charAt(0).toUpperCase()}
+            </Avatar>
+            <Typography variant="h5">{product.name}</Typography>
+            <Typography variant="body2" sx={{ color: "#b0b7cc" }}>
+              {product.category}
+            </Typography>
+            <Typography variant="body2">
+              <strong>Stock Level:</strong> {product.stock_level}
+            </Typography>
+            <Typography variant="body2">
+              <strong>Threshold Level:</strong> {product.threshold_level}
+            </Typography>
+            <Typography variant="body2">
+              <strong>Price:</strong> ${product.price.toFixed(2)}
+            </Typography>
+            {product.supplier && (
+              <Typography variant="body2">
+                <strong>Supplier:</strong> {product.supplier}
+              </Typography>
+            )}
+          </CardContent>
+          <CardContent sx={{ textAlign: "center" }}>
+            <Button
+              variant="contained"
+              sx={{
+                backgroundColor: "white",
+                color: "black",
+                textTransform: "none",
+                fontWeight: "bold",
+                fontSize: "0.875rem",
+                padding: "0.5rem 1rem",
+                "&:hover": {
+                  backgroundColor: "white",
+                },
+              }}
+              onClick={() => navigate("/dashboard")}
+            >
+              Back to Dashboard
+            </Button>
+          </CardContent>
+        </Card>
+      </Box>
+      <Box
         sx={{
-          maxWidth: "400px",
-          width: "100%",
-          backgroundColor: "#1e1e1e",
-          color: "#e0e7ff",
-          borderRadius: "10px",
           padding: "1rem",
+          backgroundColor: "#1e1e1e",
+          borderRadius: "8px",
+          color: "white",
         }}
       >
-        <CardContent
+        <Typography variant="h6" sx={{ marginBottom: "1rem" }}>
+          Update Product
+        </Typography>
+        <Grid container spacing={2}>
+          {Object.keys(product).map((key) => (
+            <Grid item xs={12} sm={4} key={key}>
+              <Box sx={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      onChange={(e) =>
+                        handleCheckboxChange(
+                          key as keyof ProductData,
+                          e.target.checked
+                        )
+                      }
+                    />
+                  }
+                  label={key}
+                />
+                <TextField
+                  disabled={
+                    !updates.find((update) => update.field_name === key)
+                  }
+                  onChange={(e) =>
+                    handleValueChange(key as keyof ProductData, e.target.value)
+                  }
+                  placeholder={`Current: ${product[key as keyof ProductData]}`}
+                  fullWidth
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: "8px",
+                      "& fieldset": {
+                        borderColor: "#d9d9d9",
+                      },
+                      "&:hover fieldset": {
+                        borderColor: "#4f80ff",
+                      },
+                      "&.Mui-focused fieldset": {
+                        borderColor: "#4f80ff",
+                      },
+                    },
+                    "& .MuiInputBase-input": {
+                      color: "white",
+                    },
+                    "& .MuiInputLabel-root": {
+                      color: "white",
+                    },
+                    "& .MuiInputLabel-root.Mui-focused": {
+                      color: "white",
+                    },
+                  }}
+                />
+              </Box>
+            </Grid>
+          ))}
+        </Grid>
+        <Button
+          variant="contained"
           sx={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            gap: "0.5rem",
-          }}
-        >
-          <Avatar
-            src={product.avatar_url}
-            sx={{
-              width: 128,
-              height: 128,
-              fontSize: "1.5rem",
-            }}
-          >
-            {product.name.charAt(0).toUpperCase()}
-          </Avatar>
-          <Typography
-            variant="h5"
-            sx={{
-              fontWeight: "bold",
-              textAlign: "center",
-            }}
-          >
-            {product.name}
-          </Typography>
-          <Typography
-            variant="body2"
-            sx={{
-              color: "#b0b7cc",
-              textAlign: "center",
-            }}
-          >
-            {product.category}
-          </Typography>
-        </CardContent>
-        <CardContent>
-          <Typography variant="body2" sx={{ marginBottom: "0.5rem" }}>
-            {product.description || "No description available"}
-          </Typography>
-          <Typography variant="body2">
-            <strong>Stock Level:</strong> {product.stock_level}
-          </Typography>
-          <Typography variant="body2">
-            <strong>Threshold Level:</strong> {product.threshold_level}
-          </Typography>
-          <Typography variant="body2">
-            <strong>Price:</strong> ${product.price.toFixed(2)}
-          </Typography>
-          <Typography variant="body2">
-            <strong>Depletion Rate:</strong> {product.depletion_rate}
-          </Typography>
-          {product.supplier && (
-            <Typography variant="body2">
-              <strong>Supplier:</strong> {product.supplier}
-            </Typography>
-          )}
-        </CardContent>
-        <CardContent
-          sx={{
-            display: "flex",
-            justifyContent: "center",
-          }}
-        >
-          <Button
-            variant="contained"
-            sx={{
+            backgroundColor: "white",
+            color: "black",
+            textTransform: "none",
+            fontWeight: "bold",
+            marginTop: "1.5rem",
+            "&:hover": {
               backgroundColor: "white",
-              color: "black",
-              textTransform: "none",
-              fontWeight: "bold",
-              fontSize: "0.875rem",
-              padding: "0.5rem 1rem",
-              "&:hover": {
-                backgroundColor: "white",
-              },
-            }}
-            onClick={() => navigate("/dashboard")}
-          >
-            Back to Dashboard
-          </Button>
-        </CardContent>
-      </Card>
+            },
+          }}
+          onClick={handleSubmit}
+        >
+          Update Product
+        </Button>
+      </Box>
     </Box>
   );
 };
+
 export default ProductDetail;
