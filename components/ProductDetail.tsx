@@ -13,6 +13,7 @@ import {
   Grid,
 } from "@mui/material";
 import Alert from "@mui/material/Alert";
+import Chart from "./Chart";
 
 interface ProductData {
   id: string;
@@ -273,6 +274,12 @@ const ProductDetail: React.FC = () => {
           </Alert>
         ) : null}
       </Box>
+      <CardContent>
+        <Typography variant="h6" sx={{ marginBottom: "1rem" }}>
+          Product History
+        </Typography>
+        <Chart productId={id || ""} />
+      </CardContent>
     </Box>
   );
 };

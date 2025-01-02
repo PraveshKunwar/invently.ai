@@ -65,3 +65,19 @@ def update_product_with_history(product_id):
         return jsonify({"message": "Product updated successfully"}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+@data_bp.route('/product/<int:product_id>/history', methods=['GET'])
+def get_product_history(product_id):
+    try:
+        response = (
+            supabase_client.table('ProductsHistory')
+            .select('*')
+            .eq('product_id', product_id)
+            .execute()
+        )
+        if "error" in response and response["error"]:
+            return jsonify({"error": response["error"]["message"]}), 400
+        return jsonify(response.data), 200
+    except Exception as e:
+        print(str(e))
+        return jsonify({"error": str(e)}), 500

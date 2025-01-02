@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import SignOut from "./SignOut";
 import Product from "./Product";
+import { Button } from "@mui/joy";
 
 interface UserSession {
   id: string;
@@ -26,6 +27,9 @@ const Dashboard: React.FC = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState<UserSession | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const handlePlans = () => {
+    navigate("/dashboard/plans");
+  };
   useEffect(() => {
     const checkUserSession = async () => {
       try {
@@ -87,6 +91,26 @@ const Dashboard: React.FC = () => {
         <div className="dashboard-data">
           <p>Welcome, {user.email}!</p>
           <SignOut />
+          <Button
+            onClick={handlePlans}
+            type="button"
+            variant="solid"
+            sx={{
+              width: "100%",
+              marginTop: "1rem",
+              maxWidth: "200px",
+              padding: "0.75rem",
+              fontWeight: "bold",
+              textTransform: "uppercase",
+              backgroundColor: "black",
+              color: "#EFBF04",
+              "&:hover": {
+                backgroundColor: "black",
+              },
+            }}
+          >
+            Explore Plans
+          </Button>
           <Product />
         </div>
       ) : (

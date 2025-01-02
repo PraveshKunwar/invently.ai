@@ -11,6 +11,7 @@ import SignUpForm from "../components/SignUpForm";
 import Dashboard from "../components/Dashboard";
 import AuthCallback from "../components/AuthCallback";
 import ProductDetail from "../components/ProductDetail";
+import Plans from "../components/Plans";
 
 const App: React.FC = () => {
   return (
@@ -30,6 +31,7 @@ const App: React.FC = () => {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/auth/callback" element={<AuthCallback />} />
           <Route path="/dashboard/products/:id" element={<ProductDetail />} />
+          <Route path="/dashboard/plans" element={<Plans />} />
           {/* Handle unknown routes */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
