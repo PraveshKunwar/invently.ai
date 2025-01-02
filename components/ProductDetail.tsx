@@ -14,6 +14,7 @@ import {
 } from "@mui/material";
 import Alert from "@mui/material/Alert";
 import Chart from "./Chart";
+import AI from "./AI";
 
 interface ProductData {
   id: string;
@@ -274,6 +275,9 @@ const ProductDetail: React.FC = () => {
           </Alert>
         ) : null}
       </Box>
+      <CardContent>
+        <AI />
+      </CardContent>
       <CardContent>
         <Typography variant="h6" sx={{ marginBottom: "1rem" }}>
           Product History

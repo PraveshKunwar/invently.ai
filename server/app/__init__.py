@@ -9,7 +9,9 @@ def create() -> Flask:
     from .auth import auth_bp
     from .data import data_bp
     from .subscribe import subscription_bp
+    from .ai import ai_bp
     app.register_blueprint(auth_bp)
     app.register_blueprint(data_bp)
     app.register_blueprint(subscription_bp)
+    app.register_blueprint(ai_bp)
     return app
